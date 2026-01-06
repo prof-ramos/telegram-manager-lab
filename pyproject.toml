@@ -1,0 +1,88 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telegram-manager"
+version = "2.0.0"
+description = "Production-grade Telegram Manager with Cyberpunk UI"
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Gabriel Ramos", email = "contato@gabrielramos.dev"}
+]
+keywords = ["telegram", "telethon", "cli", "rich", "cyberpunk"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications :: Chat",
+]
+
+dependencies = [
+    "telethon>=1.33.0",
+    "rich>=13.7.0",
+    "python-dotenv>=1.0.0",
+    "aiofiles>=23.2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.12.0",
+    "flake8>=6.1.0",
+    "mypy>=1.7.0",
+    "isort>=5.13.0",
+]
+
+[project.urls]
+Repository = "https://github.com/gabrielramos/telegram-manager"
+Documentation = "https://github.com/gabrielramos/telegram-manager#readme"
+Issues = "https://github.com/gabrielramos/telegram-manager/issues"
+
+[tool.black]
+line-length = 100
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 100
+known_first_party = "telegram_manager"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --strict-markers"
+testpaths = ["tests"]
+asyncio_mode = "auto"
