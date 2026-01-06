@@ -9,35 +9,32 @@ git clone https://github.com/gabrielramos/telegram-manager.git
 cd telegram-manager
 ```
 
-### 2. Configure o ambiente de desenvolvimento
+### 2. Instale dependências de desenvolvimento (uv)
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-```
-
-### 3. Instale dependências de desenvolvimento
-
-```bash
-pip install -r requirements.txt
-pip install -e .[dev]
+uv sync
 ```
 
 ## Estrutura de Código
 
-### Core Modules
+### Estrutura de camadas (visão geral)
 
 ```
 telegram_manager/
-├── core/
-│   ├── client.py     - Gerenciamento de conexão
-│   ├── scanner.py    - Lógica de escaneamento
-│   └── exporter.py   - Exportação de dados
-├── ui/
-│   ├── theme.py      - Definições de tema
-│   └── components.py - Componentes de UI
-├── utils/
-│   └── config.py     - Gerenciamento de config
+├── interface/
+│   ├── cli.py        - Entrada via CLI
+│   └── ui/
+│       ├── theme.py  - Definições de tema
+│       └── components.py - Componentes de UI
+├── application/
+│   ├── use_cases/    - Casos de uso
+│   └── ports/        - Interfaces (protocols)
+├── domain/
+│   └── entities/     - Entidades do domínio
+├── infrastructure/
+│   ├── telethon/     - Integração com Telethon
+│   ├── storage/      - Exportação de dados
+│   └── config/       - Configuração (.env)
 └── __init__.py
 ```
 
@@ -104,20 +101,20 @@ async def minha_funcao_async() -> None:
 ### Executar todos os testes
 
 ```bash
-pytest
+uv run pytest
 ```
 
 ### Executar testes com cobertura
 
 ```bash
-pytest --cov=telegram_manager --cov-report=html
+uv run pytest --cov=telegram_manager --cov-report=html
 ```
 
 ### Exemplo de teste
 
 ```python
 import pytest
-from telegram_manager.utils.config import TelegramConfig
+from telegram_manager.infrastructure.config.env import TelegramConfig
 
 def test_config_validation():
     """Testa validação de configuração."""
@@ -174,7 +171,7 @@ black telegram_manager/
 isort telegram_manager/
 flake8 telegram_manager/ --max-line-length=100
 mypy telegram_manager/
-pytest
+uv run pytest
 ```
 
 ## Adicionando novos módulos
@@ -182,13 +179,13 @@ pytest
 ### 1. Criar arquivo no pacote apropriado
 
 ```bash
-touch telegram_manager/core/novo_modulo.py
+touch telegram_manager/application/use_cases/novo_modulo.py
 ```
 
 ### 2. Adicionar imports no `__init__.py`
 
 ```python
-# telegram_manager/core/__init__.py
+# telegram_manager/application/use_cases/__init__.py
 from .novo_modulo import MinhaClasse
 
 __all__ = ['MinhaClasse']
@@ -197,8 +194,8 @@ __all__ = ['MinhaClasse']
 ### 3. Adicionar testes
 
 ```bash
-mkdir -p tests/core
-touch tests/core/test_novo_modulo.py
+mkdir -p tests/application
+touch tests/application/test_novo_modulo.py
 ```
 
 ### 4. Adicionar documentação
@@ -229,8 +226,8 @@ print(s.getvalue())
 ### Memory usage
 
 ```bash
-pip install memory-profiler
-python -m memory_profiler script.py
+uv add --dev memory-profiler
+uv run python -m memory_profiler script.py
 ```
 
 ## Deploy
@@ -238,15 +235,15 @@ python -m memory_profiler script.py
 ### Build package
 
 ```bash
-pip install build
-python -m build
+uv add --dev build
+uv run python -m build
 ```
 
 ### Upload to PyPI
 
 ```bash
-pip install twine
-twine upload dist/*
+uv add --dev twine
+uv run twine upload dist/*
 ```
 
 ## Commit Messages
@@ -268,7 +265,7 @@ perf: otimiza scan de dialogos
 
 - [ ] Código segue convencões (Black, isort)
 - [ ] Type hints são completos
-- [ ] Testes passam (pytest)
+- [ ] Testes passam (uv run pytest)
 - [ ] Linting passa (flake8, mypy)
 - [ ] Documentação está atualizada
 - [ ] Commit messages seguem Conventional Commits
@@ -286,15 +283,14 @@ perf: otimiza scan de dialogos
 ### Import errors
 
 Garanta que:
-1. O pacote está instalado em modo edição: `pip install -e .`
-2. O ambiente virtual está ativado
-3. Executando Python do venv correto
+1. O pacote está instalado e sincronizado: `uv sync`
+2. Executando via `uv run`
 
 ### Test failures
 
 ```bash
-pytest -vv -s  # Verbose + show output
-pytest --pdb   # Debug com pdb
+uv run pytest -vv -s  # Verbose + show output
+uv run pytest --pdb   # Debug com pdb
 ```
 
 ---

@@ -12,9 +12,10 @@ Autor: Gabriel Ramos
 __version__ = "2.0.0"
 __author__ = "Gabriel Ramos"
 
-from .core.client import TelegramClientManager
-from .core.scanner import TelegramScanner, ScanResult, DialogInfo
-from .utils.config import TelegramConfig
+from .domain.entities.dialog import ScanResult, DialogInfo
+from .infrastructure.config.env import TelegramConfig
+from .infrastructure.telethon.client import TelegramClientManager
+from .infrastructure.telethon.scanner import TelegramScanner
 
 __all__ = [
     'TelegramClientManager',

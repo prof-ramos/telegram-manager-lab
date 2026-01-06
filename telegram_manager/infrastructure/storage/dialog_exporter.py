@@ -3,7 +3,7 @@ import csv
 from pathlib import Path
 from typing import List
 import logging
-from .scanner import ScanResult, DialogInfo
+from telegram_manager.domain.entities.dialog import ScanResult, DialogInfo
 
 logger = logging.getLogger(__name__)
 

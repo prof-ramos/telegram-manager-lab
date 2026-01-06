@@ -1,44 +1,11 @@
-from dataclasses import dataclass, field
-from typing import Dict, List
 from telethon import TelegramClient
 from telethon.tl.types import User, Chat, Channel
 import logging
 
+from telegram_manager.domain.entities.dialog import DialogInfo, ScanResult
+from telegram_manager.domain.policies.bot_classification import is_official_bot
+
 logger = logging.getLogger(__name__)
-
-OFFICIAL_BOTS = ['BotFather', 'SpamBot', 'TelegramSupport', 'notifications', 'GroupAnonymousBot']
-
-
-@dataclass
-class DialogInfo:
-    id: int
-    name: str
-    type: str
-    is_official: bool = False
-    username: str = ""
-    participants_count: int = 0
-
-
-@dataclass
-class ScanResult:
-    users: List[DialogInfo] = field(default_factory=list)
-    bots: List[DialogInfo] = field(default_factory=list)
-    groups: List[DialogInfo] = field(default_factory=list)
-    channels: List[DialogInfo] = field(default_factory=list)
-    
-    @property
-    def total(self) -> int:
-        return len(self.users) + len(self.bots) + len(self.groups) + len(self.channels)
-    
-    @property
-    def stats(self) -> Dict[str, int]:
-        return {
-            'total_dialogs': self.total,
-            'users': len(self.users),
-            'bots': len(self.bots),
-            'groups': len(self.groups),
-            'channels': len(self.channels)
-        }
 
 
 class TelegramScanner:
@@ -76,7 +43,9 @@ class TelegramScanner:
     async def _create_dialog_info(self, entity) -> DialogInfo:
         name = getattr(entity, 'title', None) or getattr(entity, 'username', None) or "Unnamed"
         username = getattr(entity, 'username', '')
-        is_official = username in OFFICIAL_BOTS if isinstance(entity, User) and entity.bot else False
+        is_official = (
+            is_official_bot(username) if isinstance(entity, User) and entity.bot else False
+        )
         
         participants_count = 0
         if hasattr(entity, 'participants_count'):

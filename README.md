@@ -20,17 +20,10 @@
 cd telegram-manager-lab
 ```
 
-### 2. Crie um ambiente virtual
+### 2. Instale as dependências (uv)
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # No Windows: venv\Scripts\activate
-```
-
-### 3. Instale as dependências
-
-```bash
-pip install -r requirements.txt
+uv sync
 ```
 
 ### 4. Configure as variáveis de ambiente
@@ -54,7 +47,7 @@ TELEGRAM_PHONE=+5511999999999
 ### Executar o programa
 
 ```bash
-python main.py
+uv run python main.py
 ```
 
 O programa irá:
@@ -69,18 +62,24 @@ O programa irá:
 ```
 telegram-manager-lab/
 ├── telegram_manager/
-│   ├── core/
-│   │   ├── client.py        # Gerenciamento do cliente Telegram
-│   │   ├── scanner.py       # Lógica de escaneamento
-│   │   └── exporter.py      # Exportação de dados (JSON, CSV)
-│   ├── ui/
-│   │   ├── theme.py         # Paleta Synthwave/Cyberpunk
-│   │   └── components.py    # Componentes UI reutilizáveis
-│   ├── utils/
-│   │   └── config.py        # Gerenciamento de configuração
+│   ├── interface/
+│   │   ├── cli.py           # Ponto de entrada (CLI)
+│   │   └── ui/
+│   │       ├── theme.py     # Paleta Synthwave/Cyberpunk
+│   │       └── components.py # Componentes UI reutilizáveis
+│   ├── application/
+│   │   ├── use_cases/       # Casos de uso (scan, export, download)
+│   │   └── ports/           # Interfaces para infra
+│   ├── domain/
+│   │   └── entities/        # Entidades de domínio (DialogInfo, ScanResult)
+│   ├── infrastructure/
+│   │   ├── telethon/        # Integrações com Telethon
+│   │   ├── storage/         # Exportação de dados
+│   │   └── config/          # Configuração (.env)
 │   └── __init__.py
 ├── main.py                   # Ponto de entrada
-├── requirements.txt          # Dependências
+├── requirements.txt          # Dependências (referência)
+├── uv.lock                   # Lockfile do uv
 ├── .env.example             # Template de configuração
 └── README.md                # Este arquivo
 ```
@@ -89,27 +88,27 @@ telegram-manager-lab/
 
 ### Componentes Principais
 
-#### `TelegramConfig` (utils/config.py)
+#### `TelegramConfig` (infrastructure/config/env.py)
 - Carrega e valida configurações do arquivo `.env`
 - Garante que todas as credenciais estão presentes
 - Cria diretórios de backup automaticamente
 
-#### `TelegramClientManager` (core/client.py)
+#### `TelegramClientManager` (infrastructure/telethon/client.py)
 - Gerencia a conexão com Telegram usando context manager
 - Trata exceções (FloodWait, SessionPasswordNeeded)
 - Garante desconexão apropriada
 
-#### `TelegramScanner` (core/scanner.py)
+#### `TelegramScanner` (infrastructure/telethon/scanner.py)
 - Itera sobre todos os diálogos
 - Classifica em User, Bot, Group, Channel
 - Extrai metadados (ID, nome, username, contagem de participantes)
 
-#### `DialogExporter` (core/exporter.py)
+#### `DialogExporter` (infrastructure/storage/dialog_exporter.py)
 - Exporta resultados em JSON
 - Exporta resultados em CSV
 - Cria diretório de exports automaticamente
 
-#### `UIComponents` (ui/components.py)
+#### `UIComponents` (interface/ui/components.py)
 - Componentes reutilizáveis de UI
 - Painéis coloridos com tema Synthwave
 - Tabelas formatadas
@@ -211,21 +210,17 @@ id,name,type,username,participants_count,is_official
 ### Integrar em seu próprio código
 
 ```python
-from telegram_manager.utils.config import TelegramConfig
-from telegram_manager.core.client import TelegramClientManager
-from telegram_manager.core.scanner import TelegramScanner
-from telegram_manager.core.exporter import DialogExporter
+from telegram_manager.application.bootstrap import build_app
 
 async def meu_codigo():
-    config = TelegramConfig.from_env()
-    client_manager = TelegramClientManager(config)
+    app = build_app()
     
-    async with client_manager.get_client() as client:
-        scanner = TelegramScanner(client)
-        result = await scanner.scan_all_dialogs()
+    async with app.client_manager.get_client() as client:
+        scan_use_case = app.scan_use_case(client)
+        result = await scan_use_case.execute()
         
-        exporter = DialogExporter()
-        exporter.export_to_json(result)
+        export_use_case = app.export_use_case()
+        export_use_case.execute(result)
 ```
 
 ## Troubleshooting

@@ -14,6 +14,8 @@ class SynthwaveColors(str, Enum):
 
 
 class ThemeStyles:
+    PRIMARY = Style(color=SynthwaveColors.PRIMARY)
+    SECONDARY = Style(color=SynthwaveColors.SECONDARY)
     HEADER = Style(color=SynthwaveColors.PRIMARY, bold=True)
     SUBHEADER = Style(color=SynthwaveColors.SECONDARY, italic=True)
     SUCCESS = Style(color=SynthwaveColors.SUCCESS, bold=True)
@@ -25,4 +27,10 @@ class ThemeStyles:
 
 CYBER_SPINNER = ["[◐]", "[◓]", "[◑]", "[◒]"]
 NEON_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
-OFFICIAL_BOTS = ['BotFather', 'SpamBot', 'TelegramSupport', 'notifications', 'GroupAnonymousBot']
+OFFICIAL_BOTS = [
+    "BotFather",
+    "SpamBot",
+    "TelegramSupport",
+    "notifications",
+    "GroupAnonymousBot",
+]
